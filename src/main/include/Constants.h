@@ -26,35 +26,35 @@ namespace GeneralConstants {
 const int kDriverPort = 0;
 const int kOperatorPort = 1;
 
-const SDSModuleType mk3_standard =
-    SDSModuleType{0.1016, (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 60.0), true,
-                  (15.0 / 32.0) * (10.0 / 60.0), true};
-const SDSModuleType mk3_fast =
-    SDSModuleType{0.1016, (16.0 / 48.0) * (28.0 / 16.0) * (15.0 / 60.0), true,
-                  (15.0 / 32.0) * (10.0 / 60.0), true};
+const SDSModuleType mk3_standard{0.1016,
+                                 (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 60.0),
+                                 true, (15.0 / 32.0) * (10.0 / 60.0), true};
+const SDSModuleType mk3_fast{0.1016,
+                             (16.0 / 48.0) * (28.0 / 16.0) * (15.0 / 60.0),
+                             true, (15.0 / 32.0) * (10.0 / 60.0), true};
 
-const SDSModuleType mk4_l1 =
-    SDSModuleType{0.10033, (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0), true,
-                  (15.0 / 32.0) * (10.0 / 60.0), true};
-const SDSModuleType mk4_l2 =
-    SDSModuleType{0.10033, (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0), true,
-                  (15.0 / 32.0) * (10.0 / 60.0), true};
-const SDSModuleType mk4_l3 =
-    SDSModuleType{0.10033, (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0), true,
-                  (15.0 / 32.0) * (10.0 / 60.0), true};
-const SDSModuleType mk4_l4 =
-    SDSModuleType{0.10033, (16.0 / 48.0) * (28.0 / 16.0) * (15.0 / 45.0), true,
-                  (15.0 / 32.0) * (10.0 / 60.0), true};
+const SDSModuleType mk4_l1{0.10033,
+                           (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0), true,
+                           (15.0 / 32.0) * (10.0 / 60.0), true};
+const SDSModuleType mk4_l2{0.10033,
+                           (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0), true,
+                           (15.0 / 32.0) * (10.0 / 60.0), true};
+const SDSModuleType mk4_l3{0.10033,
+                           (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0), true,
+                           (15.0 / 32.0) * (10.0 / 60.0), true};
+const SDSModuleType mk4_l4{0.10033,
+                           (16.0 / 48.0) * (28.0 / 16.0) * (15.0 / 45.0), true,
+                           (15.0 / 32.0) * (10.0 / 60.0), true};
 
-const SDSModuleType mk4i_l1 =
-    SDSModuleType{0.10033, (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0), true,
-                  (14.0 / 50.0) * (10.0 / 60.0), false};
-const SDSModuleType mk4i_l2 =
-    SDSModuleType{0.10033, (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0), true,
-                  (14.0 / 50.0) * (10.0 / 60.0), false};
-const SDSModuleType mk4i_l3 =
-    SDSModuleType{0.10033, (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0), true,
-                  (14.0 / 50.0) * (10.0 / 60.0), false};
+const SDSModuleType mk4i_l1{0.10033,
+                            (14.0 / 50.0) * (25.0 / 19.0) * (15.0 / 45.0), true,
+                            (14.0 / 50.0) * (10.0 / 60.0), false};
+const SDSModuleType mk4i_l2{0.10033,
+                            (14.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0), true,
+                            (14.0 / 50.0) * (10.0 / 60.0), false};
+const SDSModuleType mk4i_l3{0.10033,
+                            (14.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0), true,
+                            (14.0 / 50.0) * (10.0 / 60.0), false};
 
 const SDSModuleType kSDSModule = mk4i_l3;
 
@@ -184,11 +184,7 @@ inline double calculateAxis(double axis, double deadband, double scalar) {
   double res = axis;
 
   if (std::abs(axis) > deadband) {
-    if (axis > 0.0) {
-      res = (axis - deadband) / (1.0 - deadband);
-    } else {
-      res = (axis + deadband) / (1.0 - deadband);
-    }
+    res = (axis - std::copysign(deadband, axis)) / (1.0 - deadband);
   } else {
     res = 0.0;
   }
