@@ -1,36 +1,32 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) FRC Team 122. All Rights Reserved.
 
 #pragma once
 
-#include <frc2/command/SubsystemBase.h>
+#include <array>
+
 #include <AHRS.h>
 #include <frc/SPI.h>
+#include <frc/controller/PIDController.h>
+#include <frc/geometry/Pose2d.h>
+#include <frc/geometry/Pose3d.h>
+#include <frc/geometry/Rotation3d.h>
+#include <frc/geometry/Translation2d.h>
+#include <frc/geometry/Translation3d.h>
 #include <frc/kinematics/ChassisSpeeds.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
+#include <frc/kinematics/SwerveDriveOdometry.h>
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/kinematics/SwerveModuleState.h>
-#include <frc/kinematics/SwerveDriveOdometry.h>
-#include <frc/geometry/Pose2D.h>
-#include <frc/geometry/Translation2d.h>
-#include <frc/controller/PIDController.h>
-#include <wpi/array.h>
-#include <array>
-#include <networktables/NetworkTableInstance.h>
+#include <frc2/command/SubsystemBase.h>
 #include <networktables/DoubleArrayTopic.h>
-#include <frc/geometry/Rotation3d.h>
-#include <frc/geometry/Translation3d.h>
-#include <frc/geometry/Pose3d.h>
+#include <networktables/NetworkTableInstance.h>
+#include <wpi/array.h>
 
-
-
-#include "SwerveModule.h"
 #include "Constants.h"
-
+#include "SwerveModule.h"
 
 class SwerveDrive : public frc2::SubsystemBase {
- public:
+public:
   SwerveDrive();
 
   /**
@@ -65,7 +61,7 @@ class SwerveDrive : public frc2::SubsystemBase {
   void publishOdometry(frc::Pose2d);
   void printNetworkTableValues();
 
- private:
+private:
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.
   AHRS navx{frc::SPI::Port::kMXP};
@@ -90,8 +86,4 @@ class SwerveDrive : public frc2::SubsystemBase {
 
   nt::DoubleArrayPublisher ntPosePublisher;
   nt::DoubleArrayTopic ntPoseTopic;
-
-  
-
-
 };

@@ -1,20 +1,18 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) FRC Team 122. All Rights Reserved.
 
 #pragma once
 
-#include <frc2/command/CommandPtr.h>
 #include <frc/Joystick.h>
+#include <frc2/command/CommandPtr.h>
 #include <frc2/command/InstantCommand.h>
 #include <frc2/command/RunCommand.h>
 #include <frc2/command/button/JoystickButton.h>
 
 #include "Constants.h"
-#include "subsystems/ExampleSubsystem.h"
-#include "SwerveDrive/SwerveModule.h"
 #include "SwerveDrive/SwerveDrive.h"
+#include "SwerveDrive/SwerveModule.h"
 #include "SwerveDrive/commands/Drive.h"
+#include "subsystems/ExampleSubsystem.h"
 
 /**
  * This class is where the bulk of the robot should be declared.  Since
@@ -24,14 +22,14 @@
  * commands, and trigger mappings) should be declared here.
  */
 class RobotContainer {
- public:
+public:
   RobotContainer();
 
   void UpdateDashboard();
 
   frc2::CommandPtr GetAutonomousCommand();
 
- private:
+private:
   // Replace with CommandPS4Controller or CommandJoystick if needed
   // frc2::CommandXboxController m_driverController{0};
   frc::Joystick m_driverController{GeneralConstants::kDriverPort};
@@ -39,8 +37,6 @@ class RobotContainer {
   // The robot's subsystems are defined here...
   // ExampleSubsystem m_subsystem;
   SwerveDrive m_swerveDrive;
-
-
 
   void ConfigureBindings();
 };

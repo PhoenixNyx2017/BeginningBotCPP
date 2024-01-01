@@ -13,3 +13,12 @@ This swerve base makes use of the following hardware
 - Power Distribution Panel
 
 This is boiler plate code tested on FRC 122 Swerve drivetrain.
+
+# Code formatting
+
+Code formatting is done with the wpiformat automatic formatter, run the following
+
+```
+python3 -m pip install wpiformat
+python3 -m wpiformat
+```
