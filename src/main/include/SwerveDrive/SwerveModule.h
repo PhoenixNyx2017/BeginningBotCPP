@@ -11,6 +11,7 @@
 #include <frc/kinematics/SwerveModuleState.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/SubsystemBase.h>
+#include <units/math.h>
 #include <units/velocity.h>
 #include <units/voltage.h>
 
@@ -26,27 +27,25 @@ public:
    */
   void Periodic() override;
 
-  void resetToAbsolute();
-  frc::SwerveModuleState getCurrentState();
-  frc::SwerveModulePosition getPosition();
-  void setDesiredState(frc::SwerveModuleState desiredState, bool isOpenLoop);
-  void resetDriveEncoders();
-  void setAngle(frc::SwerveModuleState desiredState, frc::Rotation2d angle);
-  void setVelocity(frc::SwerveModuleState desiredState, bool isOpenLoop);
-  void initDriveMotor(int driveMotorID);
-  void initTurnMotor(int turnMotorID);
-  void initEncoder(int encoderID);
-  void updateSmartDash();
-  frc::SwerveModuleState checkForWrapAround(frc::SwerveModuleState desiredState,
+  void ResetToAbsolute();
+  frc::SwerveModuleState GetCurrentState();
+  frc::SwerveModulePosition GetPosition();
+  void SetDesiredState(frc::SwerveModuleState desiredState, bool isOpenLoop);
+  void ResetDriveEncoders();
+  void SetAngle(frc::SwerveModuleState desiredState, frc::Rotation2d angle);
+  void SetSpeed(double speed);
+  void SetVelocity(units::meters_per_second_t velocity);
+  void InitDriveMotor(int driveMotorID);
+  void InitTurnMotor(int turnMotorID);
+  void InitEncoder(int encoderID);
+  void UpdateSmartDash();
+  frc::SwerveModuleState CheckForWrapAround(frc::SwerveModuleState desiredState,
                                             frc::Rotation2d currentState);
-  frc::Rotation2d getCANCoder();
-  frc::Rotation2d getAngleRotation2d();
-  frc::Rotation2d getAbsoluteAngle();
-  double getDistanceMeters();
-  double getVelocityMPS();
-  void setTurnCoast();
-  void setTurnBrake();
-  void setOffset(double offset);
+  frc::Rotation2d GetRotation();
+  frc::Rotation2d GetAbsoluteRotation();
+  void SetTurnCoast();
+  void SetTurnBrake();
+  void SetOffset(double offset);
 
 private:
   // Components (e.g. motor controllers and sensors) should generally be
@@ -68,5 +67,7 @@ private:
 
   ctre::phoenix::sensors::CANCoder steerEncoder;
   frc::Rotation2d angleOffset;
-  // frc::SimpleMotorFeedforward<units::meter_t> feedForward;
+  frc::SimpleMotorFeedforward<units::meters> feedForward{
+      ModuleConstants::kDriveS, ModuleConstants::kDriveV,
+      ModuleConstants::kDriveA};
 };

@@ -5,10 +5,15 @@
 #include <cstdlib>
 
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonFX.h>
+#include <frc/controller/SimpleMotorFeedforward.h>
 #include <frc/geometry/Rotation2d.h>
 #include <frc/geometry/Translation2d.h>
 #include <frc/kinematics/SwerveDriveKinematics.h>
 #include <frc/kinematics/SwerveModuleState.h>
+#include <units/acceleration.h>
+#include <units/math.h>
+#include <units/time.h>
+#include <units/velocity.h>
 
 #include "SDSModuleType.h"
 
@@ -160,9 +165,9 @@ const int kDriveContinuousCurrentLimit = 35;
 const int kDrivePeakCurrentLimit = 60;
 const double kDrivePeakCurrentDuration = 0.1;
 
-const double kDriveS = 0.667 / 12.0;
-const double kDriveV = 2.44 / 12.0;
-const double kDriveA = 0.27 / 12.0;
+const auto kDriveS = 0.05558_V;
+const auto kDriveV = 0.20333_V / 1_mps;
+const auto kDriveA = 0.02250_V / 1_mps_sq;
 
 const double kDriveP = 0.10;
 const double kDriveI = 0.0;

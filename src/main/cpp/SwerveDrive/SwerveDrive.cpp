@@ -34,8 +34,8 @@ SwerveDrive::SwerveDrive()
                units::meter_t{-GeneralConstants::kWheelbaseMeters / 2.0}}}},
       odometry{kinematics,
                frc::Rotation2d(units::degree_t{-navx.GetAngle()}),
-               {modules[0].getPosition(), modules[1].getPosition(),
-                modules[2].getPosition(), modules[3].getPosition()},
+               {modules[0].GetPosition(), modules[1].GetPosition(),
+                modules[2].GetPosition(), modules[3].GetPosition()},
                frc::Pose2d()},
       pidX{0.9, 1e-4, 0}, pidY{0.9, 1e-4, 0}, pidRot{0.15, 0, 0},
       networkTableInst(nt::NetworkTableInstance::GetDefault()) {
@@ -72,7 +72,7 @@ void SwerveDrive::drive(frc::ChassisSpeeds desiredSpeeds, bool isOpenLoop) {
       &states, units::meters_per_second_t{ModuleConstants::kMaxSpeed});
 
   for (int i = 0; i < 4; i++) {
-    modules[i].setDesiredState(states[i], isOpenLoop);
+    modules[i].SetDesiredState(states[i], isOpenLoop);
   }
 }
 
@@ -81,33 +81,30 @@ void SwerveDrive::setFast() {}
 void SwerveDrive::setSlow() {}
 
 frc::Rotation2d SwerveDrive::getHeading() {
-  return frc::Rotation2d(units::degree_t{-navx.GetAngle()});
+  return units::degree_t{-navx.GetAngle()};
 }
 
 void SwerveDrive::resetHeading() { navx.ZeroYaw(); }
 
 void SwerveDrive::resetDriveEncoders() {
-  for (int i = 0; i < 4; i++) {
-    modules[i].resetDriveEncoders();
+  for (auto &module : modules) {
+    module.ResetDriveEncoders();
   }
 }
 
 void SwerveDrive::initDashboard() {}
 
 void SwerveDrive::updateDashboard() {
-  for (int i = 0; i < 4; i++) {
-    modules[i].updateSmartDash();
+  for (auto &module : modules) {
+    module.UpdateSmartDash();
   }
   frc::SmartDashboard::PutNumber("Heading", double{getHeading().Degrees()});
 }
 
 std::array<frc::SwerveModulePosition, 4> SwerveDrive::getModulePositions() {
-  std::array<frc::SwerveModulePosition, 4> modulePos;
-  modulePos[0] = modules[0].getPosition();
-  modulePos[1] = modules[1].getPosition();
-  modulePos[2] = modules[2].getPosition();
-  modulePos[3] = modules[3].getPosition();
-  return modulePos;
+  return std::array<frc::SwerveModulePosition, 4>{
+      {modules[0].GetPosition(), modules[1].GetPosition(),
+       modules[2].GetPosition(), modules[3].GetPosition()}};
 }
 
 void SwerveDrive::resetPose(frc::Pose2d position) {
@@ -117,8 +114,7 @@ void SwerveDrive::resetPose(frc::Pose2d position) {
 frc::Pose2d SwerveDrive::getPose() { return odometry.GetPose(); }
 
 void SwerveDrive::updateOdometry() {
-  const auto modulePos = getModulePositions();
-  odometry.Update(getHeading(), modulePos);
+  odometry.Update(getHeading(), getModulePositions());
 }
 
 frc::SwerveDriveKinematics<4> SwerveDrive::getKinematics() {
