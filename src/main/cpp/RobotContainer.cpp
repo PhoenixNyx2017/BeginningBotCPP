@@ -61,7 +61,6 @@ frc2::CommandPtr RobotContainer::GetAutonomousCommand() {
 }
 
 void RobotContainer::UpdateDashboard() {
-  m_swerveDrive.updateDashboard();
   frc::SmartDashboard::PutNumber("driver X", m_driverController.GetX());
   frc::SmartDashboard::PutNumber(
       "adjusted X",

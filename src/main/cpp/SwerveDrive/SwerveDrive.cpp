@@ -44,7 +44,7 @@ void SwerveDrive::Periodic() {
   // getCameraResults();
   // sensor fusion? EKF (eek kinda fun)
   // publishOdometry(odometry.GetPose());
-  updateDashboard();
+  frc::SmartDashboard::PutNumber("Heading", double{getHeading().Degrees()});
 }
 
 void SwerveDrive::drive(frc::ChassisSpeeds desiredSpeeds) {
@@ -73,15 +73,6 @@ void SwerveDrive::resetDriveEncoders() {
   for (auto &module : modules) {
     module.ResetDriveEncoders();
   }
-}
-
-void SwerveDrive::initDashboard() {}
-
-void SwerveDrive::updateDashboard() {
-  for (auto &module : modules) {
-    module.UpdateSmartDash();
-  }
-  frc::SmartDashboard::PutNumber("Heading", double{getHeading().Degrees()});
 }
 
 std::array<frc::SwerveModulePosition, 4> SwerveDrive::getModulePositions() {

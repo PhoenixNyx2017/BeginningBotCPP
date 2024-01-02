@@ -43,8 +43,6 @@ public:
   void resetHeading();
   void resetDriveEncoders();
 
-  void initDashboard();
-  void updateDashboard();
   std::array<frc::SwerveModulePosition, 4> getModulePositions();
 
   void resetPose(frc::Pose2d);

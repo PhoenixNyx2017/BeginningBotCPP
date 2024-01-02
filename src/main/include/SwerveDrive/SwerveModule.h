@@ -15,6 +15,7 @@
 #include <units/voltage.h>
 
 #include "Constants.h"
+#include "util/NKFalcon.h"
 
 class SwerveModule : public frc2::SubsystemBase {
 public:
@@ -26,16 +27,13 @@ public:
    */
   void Periodic() override;
 
-  void ResetToAbsolute();
+  void SyncEncoders();
   frc::SwerveModuleState GetCurrentState();
   frc::SwerveModulePosition GetPosition();
   void SetDesiredState(frc::SwerveModuleState desiredState);
   void SetOpenLoopState(frc::SwerveModuleState desiredState);
   void ResetDriveEncoders();
-  void InitDriveMotor(int driveMotorID);
-  void InitTurnMotor(int turnMotorID);
   void InitEncoder(int encoderID);
-  void UpdateSmartDash();
   frc::SwerveModuleState CheckForWrapAround(frc::SwerveModuleState desiredState,
                                             frc::Rotation2d currentState);
   frc::Rotation2d GetRotation();
@@ -47,17 +45,14 @@ private:
   // declared private and exposed only through public methods.
   int m_id;
 
-  ctre::phoenix::motorcontrol::can::TalonFXConfiguration m_DriveMotorConfig =
-      ctre::phoenix::motorcontrol::can::TalonFXConfiguration();
+  ctre::phoenix::motorcontrol::can::TalonFXConfiguration m_DriveMotorConfig{};
 
-  ctre::phoenix::motorcontrol::can::TalonFXConfiguration m_TurnMotorConfig =
-      ctre::phoenix::motorcontrol::can::TalonFXConfiguration();
+  ctre::phoenix::motorcontrol::can::TalonFXConfiguration m_TurnMotorConfig{};
 
-  ctre::phoenix::sensors::CANCoderConfiguration m_EncoderConfig =
-      ctre::phoenix::sensors::CANCoderConfiguration();
+  ctre::phoenix::sensors::CANCoderConfiguration m_EncoderConfig{};
 
-  ctre::phoenix::motorcontrol::can::TalonFX m_driveMotor;
-  ctre::phoenix::motorcontrol::can::TalonFX m_steerMotor;
+  ctre::phoenix::NKFalcon m_driveMotor;
+  ctre::phoenix::NKFalcon m_steerMotor;
 
   ctre::phoenix::sensors::CANCoder m_steerEncoder;
   frc::Rotation2d m_angleOffset;

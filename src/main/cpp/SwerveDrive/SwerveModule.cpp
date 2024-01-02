@@ -14,39 +14,95 @@ SwerveModule::SwerveModule(int driveMotorId, int steerMotorId,
       m_steerMotor{steerMotorId}, m_steerEncoder{steerEncoderId},
       m_angleOffset{angleOffset} {
   InitEncoder(steerEncoderId);
-  InitDriveMotor(driveMotorId);
-  InitTurnMotor(steerMotorId);
 
-  ResetToAbsolute();
+  m_steerMotor.ConfigFactoryDefault();
+  m_driveMotor.ConfigFactoryDefault();
+
+  m_steerMotor.SetSelectedFeedbackSensor(
+      motorcontrol::FeedbackDevice::IntegratedSensor);
+  m_steerMotor.SetSelectedFeedbackCoefficient(1);
+
+  m_steerMotor.SetPIDF(ModuleConstants::kTurnP, ModuleConstants::kTurnI,
+                       ModuleConstants::kTurnD, ModuleConstants::kTurnF);
+  m_driveMotor.SetPIDF(ModuleConstants::kDriveP, ModuleConstants::kDriveI,
+                       ModuleConstants::kDriveD, ModuleConstants::kDriveF);
+
+  m_steerMotor.SetSupplyCurrentLimit(
+      motorcontrol::SupplyCurrentLimitConfiguration(
+          ModuleConstants::kTurnEnableCurrentLimit,
+          ModuleConstants::kTurnContinuousCurrentLimit,
+          ModuleConstants::kTurnPeakCurrentLimit,
+          ModuleConstants::kTurnPeakCurrentDuration));
+  m_driveMotor.SetSupplyCurrentLimit(
+      motorcontrol::SupplyCurrentLimitConfiguration(
+          ModuleConstants::kDriveEnableCurrentLimit,
+          ModuleConstants::kDriveContinuousCurrentLimit,
+          ModuleConstants::kDrivePeakCurrentLimit,
+          ModuleConstants::kDrivePeakCurrentDuration));
+
+  m_steerMotor.SetSensorInitializationStrategy(
+      sensors::SensorInitializationStrategy::BootToZero);
+  m_driveMotor.SetSensorInitializationStrategy(
+      sensors::SensorInitializationStrategy::BootToZero);
+
+  m_steerMotor.SetVoltageCompensation(ModuleConstants::kTurnVoltageComp);
+  m_driveMotor.SetVoltageCompensation(ModuleConstants::kDriveVoltageComp);
+
+  m_steerMotor.SetInverted(ModuleConstants::kTurnMotorInverted);
+  m_driveMotor.SetInverted(ModuleConstants::kDriveMotorInverted);
+
+  m_steerMotor.SetNeutralMode(ModuleConstants::kTurnMotorNeutral);
+  m_driveMotor.SetNeutralMode(ModuleConstants::kDriveMotorNeutral);
+
+  m_steerMotor.ConfigSelectedFeedbackSensor(
+      motorcontrol::FeedbackDevice::IntegratedSensor, 0, 0);
+
+  m_driveMotor.SetOpenLoopRampRate(ModuleConstants::kOpenLoopRamp);
+  m_driveMotor.SetClosedLoopRampRate(ModuleConstants::kClosedLoopRamp);
+  m_driveMotor.SetVelocityMeasurementPeriod(
+      sensors::SensorVelocityMeasPeriod::Period_10Ms);
+
+  m_steerMotor.ConfigAllSettings();
+  m_driveMotor.ConfigAllSettings();
+
+  m_driveMotor.SetSelectedSensorPosition(0);
+
+  m_steerMotor.SetPositionConversionFactor(360 *
+                                           ModuleConstants::kTurnGearRatio);
+  m_driveMotor.SetPositionConversionFactor(
+      ModuleConstants::kWheelCircumference * ModuleConstants::kDriveGearRatio);
+  m_driveMotor.SetVelocityConversionFactor(
+      60 * ModuleConstants::kWheelCircumference *
+      ModuleConstants::kDriveGearRatio);
+
+  SyncEncoders();
 }
 
 // This method will be called once per scheduler run
-void SwerveModule::Periodic() {}
+void SwerveModule::Periodic() {
+  frc::SmartDashboard::PutNumber(std::to_string(m_id) + "PureRaw Angle",
+                                 GetAbsoluteRotation().Degrees().value());
+  frc::SmartDashboard::PutNumber(std::to_string(m_id) + "Magnet offset",
+                                 m_angleOffset.Degrees().value());
+}
 
-void SwerveModule::ResetToAbsolute() {
-  double angle = (GetAbsoluteRotation() - m_angleOffset).Degrees().value();
-  double absolutePosition =
-      Conversions::degreesToFalcon(angle, ModuleConstants::kTurnGearRatio);
-  m_steerMotor.SetSelectedSensorPosition(absolutePosition);
+void SwerveModule::SyncEncoders() {
+  m_steerMotor.SetSelectedSensorPosition(
+      (GetAbsoluteRotation() - m_angleOffset).Degrees().value());
 }
 
 frc::SwerveModuleState SwerveModule::GetCurrentState() {
-  double velocity = Conversions::falconToMPS(
-      m_driveMotor.GetSelectedSensorVelocity(),
-      ModuleConstants::kWheelCircumference, ModuleConstants::kDriveGearRatio);
-  return {units::meters_per_second_t{velocity}, GetRotation()};
+  return {units::meters_per_second_t{m_driveMotor.GetVelocity()},
+          GetRotation()};
 }
 
 frc::SwerveModulePosition SwerveModule::GetPosition() {
-  double distance = Conversions::falconToMeters(
-      m_driveMotor.GetSelectedSensorPosition(),
-      ModuleConstants::kWheelCircumference, ModuleConstants::kDriveGearRatio);
-  return {units::meter_t{distance}, GetRotation()};
+  return {units::meter_t{m_driveMotor.GetPosition()}, GetRotation()};
 }
 
 void SwerveModule::SetDesiredState(frc::SwerveModuleState state) {
-  if (m_steerMotor.HasResetOccurred()) {
-    ResetToAbsolute();
+  if (m_steerMotor.HasResetOccured()) {
+    SyncEncoders();
   }
 
   frc::Rotation2d rotation = GetRotation();
@@ -55,22 +111,16 @@ void SwerveModule::SetDesiredState(frc::SwerveModuleState state) {
   state = frc::SwerveModuleState::Optimize(state, rotation);
   state = CheckForWrapAround(state, rotation);
 
-  double velocity = Conversions::MPSToFalcon(
-      state.speed.value(), ModuleConstants::kWheelCircumference,
-      ModuleConstants::kDriveGearRatio);
-
-  m_steerMotor.Set(
-      motorcontrol::ControlMode::Position,
-      Conversions::degreesToFalcon(state.angle.Degrees().value(),
-                                   ModuleConstants::kTurnGearRatio));
-  m_driveMotor.Set(motorcontrol::ControlMode::Velocity, velocity,
+  m_steerMotor.Set(motorcontrol::ControlMode::Position,
+                   state.angle.Degrees().value());
+  m_driveMotor.Set(motorcontrol::ControlMode::Velocity, state.speed.value(),
                    motorcontrol::DemandType::DemandType_ArbitraryFeedForward,
                    m_feedForward.Calculate(state.speed, 0_mps_sq).value());
 }
 
 void SwerveModule::SetOpenLoopState(frc::SwerveModuleState state) {
-  if (m_steerMotor.HasResetOccurred()) {
-    ResetToAbsolute();
+  if (m_steerMotor.HasResetOccured()) {
+    SyncEncoders();
   }
 
   frc::Rotation2d rotation = GetRotation();
@@ -81,71 +131,13 @@ void SwerveModule::SetOpenLoopState(frc::SwerveModuleState state) {
 
   double speed = (state.speed / ModuleConstants::kMaxSpeed).value();
 
-  m_steerMotor.Set(
-      motorcontrol::ControlMode::Position,
-      Conversions::degreesToFalcon(state.angle.Degrees().value(),
-                                   ModuleConstants::kTurnGearRatio));
+  m_steerMotor.Set(motorcontrol::ControlMode::Position,
+                   state.angle.Degrees().value());
   m_driveMotor.Set(motorcontrol::ControlMode::PercentOutput, speed);
 }
 
 void SwerveModule::ResetDriveEncoders() {
   m_driveMotor.SetSelectedSensorPosition(0, 0, 0);
-}
-
-void SwerveModule::InitDriveMotor(int driveMotorID) {
-  m_DriveMotorConfig.slot0.kP = ModuleConstants::kDriveP;
-  m_DriveMotorConfig.slot0.kI = ModuleConstants::kDriveI;
-  m_DriveMotorConfig.slot0.kD = ModuleConstants::kDriveD;
-  m_DriveMotorConfig.slot0.kF = ModuleConstants::kDriveF;
-  m_DriveMotorConfig.supplyCurrLimit =
-      motorcontrol::SupplyCurrentLimitConfiguration(
-          ModuleConstants::kDriveEnableCurrentLimit,
-          ModuleConstants::kDriveContinuousCurrentLimit,
-          ModuleConstants::kDrivePeakCurrentLimit,
-          ModuleConstants::kDrivePeakCurrentDuration);
-  m_DriveMotorConfig.initializationStrategy =
-      sensors::SensorInitializationStrategy::BootToZero;
-  m_DriveMotorConfig.openloopRamp = ModuleConstants::kOpenLoopRamp;
-  m_DriveMotorConfig.closedloopRamp = ModuleConstants::kClosedLoopRamp;
-  m_DriveMotorConfig.voltageCompSaturation = ModuleConstants::kDriveVoltageComp;
-  m_DriveMotorConfig.velocityMeasurementPeriod =
-      sensors::SensorVelocityMeasPeriod::Period_10Ms;
-
-  m_driveMotor.ConfigAllSettings(m_DriveMotorConfig);
-  m_driveMotor.SetInverted(ModuleConstants::kDriveMotorInverted);
-  m_driveMotor.SetNeutralMode(ModuleConstants::kDriveMotorNeutral);
-  m_driveMotor.SetSelectedSensorPosition(0);
-}
-
-void SwerveModule::InitTurnMotor(int turnMotorID) {
-  m_steerMotor.ConfigFactoryDefault();
-
-  m_TurnMotorConfig.primaryPID.selectedFeedbackSensor =
-      motorcontrol::FeedbackDevice::IntegratedSensor;
-  m_TurnMotorConfig.primaryPID.selectedFeedbackCoefficient = 1;
-  m_TurnMotorConfig.slot0.kP = ModuleConstants::kTurnP;
-  m_TurnMotorConfig.slot0.kI = ModuleConstants::kTurnI;
-  m_TurnMotorConfig.slot0.kD = ModuleConstants::kTurnD;
-  m_TurnMotorConfig.slot0.kF = ModuleConstants::kTurnF;
-  m_TurnMotorConfig.supplyCurrLimit =
-      motorcontrol::SupplyCurrentLimitConfiguration(
-          ModuleConstants::kTurnEnableCurrentLimit,
-          ModuleConstants::kTurnContinuousCurrentLimit,
-          ModuleConstants::kTurnPeakCurrentLimit,
-          ModuleConstants::kTurnPeakCurrentDuration);
-
-  m_TurnMotorConfig.initializationStrategy =
-      sensors::SensorInitializationStrategy::BootToZero;
-
-  m_TurnMotorConfig.voltageCompSaturation = ModuleConstants::kTurnVoltageComp;
-
-  m_steerMotor.ConfigAllSettings(m_TurnMotorConfig);
-  m_steerMotor.SetInverted(ModuleConstants::kTurnMotorInverted);
-  m_steerMotor.SetNeutralMode(ModuleConstants::kTurnMotorNeutral);
-  m_steerMotor.ConfigSelectedFeedbackSensor(
-      motorcontrol::FeedbackDevice::IntegratedSensor, 0, 0);
-
-  ResetToAbsolute();
 }
 
 void SwerveModule::InitEncoder(int encoderID) {
@@ -159,13 +151,6 @@ void SwerveModule::InitEncoder(int encoderID) {
   m_EncoderConfig.sensorTimeBase = sensors::SensorTimeBase::PerSecond;
 
   m_steerEncoder.ConfigAllSettings(m_EncoderConfig);
-}
-
-void SwerveModule::UpdateSmartDash() {
-  frc::SmartDashboard::PutNumber(std::to_string(m_id) + "PureRaw Angle",
-                                 GetAbsoluteRotation().Degrees().value());
-  frc::SmartDashboard::PutNumber(std::to_string(m_id) + "Magnet offset",
-                                 m_angleOffset.Degrees().value());
 }
 
 frc::SwerveModuleState
@@ -184,9 +169,7 @@ SwerveModule::CheckForWrapAround(frc::SwerveModuleState desiredState,
 }
 
 frc::Rotation2d SwerveModule::GetRotation() {
-  return units::degree_t{
-      Conversions::falconToDegrees(m_steerMotor.GetSelectedSensorPosition(),
-                                   ModuleConstants::kTurnGearRatio)};
+  return units::degree_t{m_steerMotor.GetPosition()};
 }
 
 frc::Rotation2d SwerveModule::GetAbsoluteRotation() {
@@ -195,5 +178,5 @@ frc::Rotation2d SwerveModule::GetAbsoluteRotation() {
 
 void SwerveModule::SetOffset(double offset) {
   m_angleOffset = units::degree_t{offset};
-  ResetToAbsolute();
+  SyncEncoders();
 }
