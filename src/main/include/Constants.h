@@ -179,9 +179,6 @@ const double kTurnI = 0;
 const double kTurnD = 12.0; // 12.0
 const double kTurnF = 0.0;
 
-const frc::Rotation2d kAllowableAngleTolerance =
-    frc::Rotation2d(units::degree_t{5.0});
-
 } // namespace ModuleConstants
 
 namespace MathUtilNK {

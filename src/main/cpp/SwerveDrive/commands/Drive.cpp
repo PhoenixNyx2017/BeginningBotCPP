@@ -27,14 +27,12 @@ void Drive::Execute() {
 
   // System.out.println("DriveCommand(" + xSpeed + ", " + ySpeed + ", " +
   // thetaSpeed + ")");
-  swerve->drive(speeds, GeneralConstants::kIsOpenLoop);
+  swerve->drive(speeds);
   frc::SmartDashboard::PutNumber("Inside?", x());
 }
 
 // Called once the command ends or is interrupted.
-void Drive::End(bool interrupted) {
-  swerve->drive(frc::ChassisSpeeds(), GeneralConstants::kIsOpenLoop);
-}
+void Drive::End(bool interrupted) { swerve->drive(frc::ChassisSpeeds()); }
 
 // Returns true when the command should end.
 bool Drive::IsFinished() { return false; }

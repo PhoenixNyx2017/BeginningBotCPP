@@ -34,7 +34,6 @@ public:
    */
   void Periodic() override;
 
-  void drive(frc::ChassisSpeeds, bool);
   void drive(frc::ChassisSpeeds);
 
   void setFast();
@@ -69,7 +68,19 @@ private:
   std::array<SwerveModule, 4> modules;
 
   frc::ChassisSpeeds speeds;
-  frc::SwerveDriveKinematics<4> kinematics;
+  frc::SwerveDriveKinematics<4> kinematics{
+      frc::Translation2d{
+          units::meter_t{GeneralConstants::kTrackwidthMeters / 2.0},
+          units::meter_t{GeneralConstants::kWheelbaseMeters / 2.0}},
+      frc::Translation2d{
+          units::meter_t{GeneralConstants::kTrackwidthMeters / 2.0},
+          units::meter_t{-GeneralConstants::kWheelbaseMeters / 2.0}},
+      frc::Translation2d{
+          units::meter_t{-GeneralConstants::kTrackwidthMeters / 2.0},
+          units::meter_t{GeneralConstants::kWheelbaseMeters / 2.0}},
+      frc::Translation2d{
+          units::meter_t{-GeneralConstants::kTrackwidthMeters / 2.0},
+          units::meter_t{-GeneralConstants::kWheelbaseMeters / 2.0}}};
   frc::SwerveDriveOdometry<4> odometry;
 
   frc::PIDController pidX;

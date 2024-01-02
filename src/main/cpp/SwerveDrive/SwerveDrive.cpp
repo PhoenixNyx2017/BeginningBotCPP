@@ -19,19 +19,6 @@ SwerveDrive::SwerveDrive()
                             GeneralConstants::kBackRightTurnMotorID,
                             GeneralConstants::kBackRightEncoderID,
                             GeneralConstants::kBackRightOffset)}},
-      kinematics{
-          {frc::Translation2d{
-               units::meter_t{GeneralConstants::kTrackwidthMeters / 2.0},
-               units::meter_t{GeneralConstants::kWheelbaseMeters / 2.0}},
-           frc::Translation2d{
-               units::meter_t{GeneralConstants::kTrackwidthMeters / 2.0},
-               units::meter_t{-GeneralConstants::kWheelbaseMeters / 2.0}},
-           frc::Translation2d{
-               units::meter_t{-GeneralConstants::kTrackwidthMeters / 2.0},
-               units::meter_t{GeneralConstants::kWheelbaseMeters / 2.0}},
-           frc::Translation2d{
-               units::meter_t{-GeneralConstants::kTrackwidthMeters / 2.0},
-               units::meter_t{-GeneralConstants::kWheelbaseMeters / 2.0}}}},
       odometry{kinematics,
                frc::Rotation2d(units::degree_t{-navx.GetAngle()}),
                {modules[0].GetPosition(), modules[1].GetPosition(),
@@ -61,10 +48,6 @@ void SwerveDrive::Periodic() {
 }
 
 void SwerveDrive::drive(frc::ChassisSpeeds desiredSpeeds) {
-  drive(desiredSpeeds, false);
-}
-
-void SwerveDrive::drive(frc::ChassisSpeeds desiredSpeeds, bool isOpenLoop) {
   speeds = desiredSpeeds;
   auto states = kinematics.ToSwerveModuleStates(speeds);
 
@@ -72,7 +55,7 @@ void SwerveDrive::drive(frc::ChassisSpeeds desiredSpeeds, bool isOpenLoop) {
       &states, units::meters_per_second_t{ModuleConstants::kMaxSpeed});
 
   for (int i = 0; i < 4; i++) {
-    modules[i].SetDesiredState(states[i], isOpenLoop);
+    modules[i].SetDesiredState(states[i]);
   }
 }
 
@@ -143,7 +126,7 @@ void SwerveDrive::setReference(frc::Pose2d desiredPose) {
             pidY.Calculate(double{getPose().Y()}, double{desiredPose.Y()})},
         units::radians_per_second_t{0}};
 
-    drive(speeds, false);
+    drive(speeds);
   }
 }
 

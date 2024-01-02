@@ -2,7 +2,6 @@
 
 #pragma once
 
-#include <ctre/phoenix/motorcontrol/NeutralMode.h>
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonFX.h>
 #include <ctre/phoenix/sensors/CANCoder.h>
 #include <frc/controller/SimpleMotorFeedforward.h>
@@ -30,11 +29,9 @@ public:
   void ResetToAbsolute();
   frc::SwerveModuleState GetCurrentState();
   frc::SwerveModulePosition GetPosition();
-  void SetDesiredState(frc::SwerveModuleState desiredState, bool isOpenLoop);
+  void SetDesiredState(frc::SwerveModuleState desiredState);
+  void SetOpenLoopState(frc::SwerveModuleState desiredState);
   void ResetDriveEncoders();
-  void SetAngle(frc::SwerveModuleState desiredState, frc::Rotation2d angle);
-  void SetSpeed(double speed);
-  void SetVelocity(units::meters_per_second_t velocity);
   void InitDriveMotor(int driveMotorID);
   void InitTurnMotor(int turnMotorID);
   void InitEncoder(int encoderID);
@@ -43,31 +40,28 @@ public:
                                             frc::Rotation2d currentState);
   frc::Rotation2d GetRotation();
   frc::Rotation2d GetAbsoluteRotation();
-  void SetTurnCoast();
-  void SetTurnBrake();
   void SetOffset(double offset);
 
 private:
   // Components (e.g. motor controllers and sensors) should generally be
   // declared private and exposed only through public methods.
-  int id;
-  double lastAngle;
+  int m_id;
 
-  ctre::phoenix::motorcontrol::can::TalonFXConfiguration kDriveMotorConfig =
+  ctre::phoenix::motorcontrol::can::TalonFXConfiguration m_DriveMotorConfig =
       ctre::phoenix::motorcontrol::can::TalonFXConfiguration();
 
-  ctre::phoenix::motorcontrol::can::TalonFXConfiguration kTurnMotorConfig =
+  ctre::phoenix::motorcontrol::can::TalonFXConfiguration m_TurnMotorConfig =
       ctre::phoenix::motorcontrol::can::TalonFXConfiguration();
 
-  ctre::phoenix::sensors::CANCoderConfiguration kEncoderConfig =
+  ctre::phoenix::sensors::CANCoderConfiguration m_EncoderConfig =
       ctre::phoenix::sensors::CANCoderConfiguration();
 
-  ctre::phoenix::motorcontrol::can::WPI_TalonFX driveMotor;
-  ctre::phoenix::motorcontrol::can::WPI_TalonFX steerMotor;
+  ctre::phoenix::motorcontrol::can::TalonFX m_driveMotor;
+  ctre::phoenix::motorcontrol::can::TalonFX m_steerMotor;
 
-  ctre::phoenix::sensors::CANCoder steerEncoder;
-  frc::Rotation2d angleOffset;
-  frc::SimpleMotorFeedforward<units::meters> feedForward{
+  ctre::phoenix::sensors::CANCoder m_steerEncoder;
+  frc::Rotation2d m_angleOffset;
+  frc::SimpleMotorFeedforward<units::meters> m_feedForward{
       ModuleConstants::kDriveS, ModuleConstants::kDriveV,
       ModuleConstants::kDriveA};
 };
