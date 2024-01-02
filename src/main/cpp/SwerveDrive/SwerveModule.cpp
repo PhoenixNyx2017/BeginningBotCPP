@@ -74,12 +74,12 @@ SwerveModule::SwerveModule(int driveMotorId, int steerMotorId,
   m_driveMotor.SetVelocityConversionFactor(
       60 * ModuleConstants::kWheelCircumference *
       ModuleConstants::kDriveGearRatio);
-
-  SyncEncoders();
 }
 
 // This method will be called once per scheduler run
 void SwerveModule::Periodic() {
+  SyncEncoders();
+
   frc::SmartDashboard::PutNumber(std::to_string(m_id) + "PureRaw Angle",
                                  GetAbsoluteRotation().Degrees().value());
   frc::SmartDashboard::PutNumber(std::to_string(m_id) + "Magnet offset",
@@ -101,10 +101,6 @@ frc::SwerveModulePosition SwerveModule::GetPosition() {
 }
 
 void SwerveModule::SetDesiredState(frc::SwerveModuleState state) {
-  if (m_steerMotor.HasResetOccured()) {
-    SyncEncoders();
-  }
-
   frc::Rotation2d rotation = GetRotation();
 
   // TODO: May throw error
@@ -119,21 +115,16 @@ void SwerveModule::SetDesiredState(frc::SwerveModuleState state) {
 }
 
 void SwerveModule::SetOpenLoopState(frc::SwerveModuleState state) {
-  if (m_steerMotor.HasResetOccured()) {
-    SyncEncoders();
-  }
-
   frc::Rotation2d rotation = GetRotation();
 
   // TODO: May throw error
   state = frc::SwerveModuleState::Optimize(state, rotation);
   state = CheckForWrapAround(state, rotation);
 
-  double speed = (state.speed / ModuleConstants::kMaxSpeed).value();
-
   m_steerMotor.Set(motorcontrol::ControlMode::Position,
                    state.angle.Degrees().value());
-  m_driveMotor.Set(motorcontrol::ControlMode::PercentOutput, speed);
+  m_driveMotor.Set(motorcontrol::ControlMode::PercentOutput,
+                   (state.speed / ModuleConstants::kMaxSpeed).value());
 }
 
 void SwerveModule::ResetDriveEncoders() {
