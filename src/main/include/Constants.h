@@ -3,6 +3,7 @@
 #pragma once
 #include <cmath>
 #include <cstdlib>
+#include <numbers>
 
 #include <ctre/phoenix/motorcontrol/can/WPI_TalonFX.h>
 #include <frc/controller/SimpleMotorFeedforward.h>
@@ -68,7 +69,7 @@ const double kWheelbaseMeters = 0.4;
 
 const double kDefaultAxisDeadband = 0.15;
 const double kMaxTranslationalVelocity = ((6380.0) / 60) *
-                                         kSDSModule.wheelDiameter * M_PI *
+                                         kSDSModule.wheelDiameter * std::numbers::pi *
                                          kSDSModule.driveReduction;
 
 const double kMaxRotationalVelocity =
@@ -134,7 +135,7 @@ namespace ModuleConstants {
 
 const double kMaxSpeed = GeneralConstants::kMaxTranslationalVelocity;
 const double kWheelDiameterMeters = GeneralConstants::kSDSModule.wheelDiameter;
-const double kWheelCircumference = kWheelDiameterMeters * M_PI;
+const double kWheelCircumference = kWheelDiameterMeters * std::numbers::pi;
 // ratio is motor rot / wheel rot
 const double kDriveGearRatio =
     1.0 / GeneralConstants::kSDSModule.driveReduction;
