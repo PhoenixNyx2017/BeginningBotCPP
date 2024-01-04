@@ -1,9 +1,9 @@
 // Copyright (c) FRC Team 122. All Rights Reserved.
 
 #include "SwerveDrive/commands/TrajectoryFollower.h"
-#include "frc/kinematics/ChassisSpeeds.h"
 
 #include <frc/Timer.h>
+#include <frc/kinematics/ChassisSpeeds.h>
 #include <units/angular_velocity.h>
 #include <units/velocity.h>
 
