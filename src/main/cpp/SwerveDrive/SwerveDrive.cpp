@@ -26,7 +26,6 @@ SwerveDrive::SwerveDrive()
                frc::Pose2d()},
       pidX{0.9, 1e-4, 0}, pidY{0.9, 1e-4, 0}, pidRot{0.15, 0, 0},
       networkTableInst(nt::NetworkTableInstance::GetDefault()) {
-
   navx.Calibrate();
   speeds = frc::ChassisSpeeds();
   networkTableInst.StartServer();
@@ -36,11 +35,10 @@ SwerveDrive::SwerveDrive()
       {}, {.periodic = 0.01, .sendAll = true});
 
   ntPosePublisher = ntPoseTopic.Publish();
-};
+}
 
 // This method will be called once per scheduler run
 void SwerveDrive::Periodic() {
-
   // getCameraResults();
   // sensor fusion? EKF (eek kinda fun)
   // publishOdometry(odometry.GetPose());
@@ -108,7 +106,6 @@ void SwerveDrive::initializePID() {
 }
 
 void SwerveDrive::setReference(frc::Pose2d desiredPose) {
-
   if ((!pidX.AtSetpoint() && !pidY.AtSetpoint()) | !hasRun) {
     speeds = frc::ChassisSpeeds{
         units::meters_per_second_t{
