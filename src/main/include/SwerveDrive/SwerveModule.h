@@ -8,6 +8,7 @@
 #include <frc/geometry/Rotation2d.h>
 #include <frc/kinematics/SwerveModulePosition.h>
 #include <frc/kinematics/SwerveModuleState.h>
+#include <frc/simulation/SimDeviceSim.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <frc2/command/SubsystemBase.h>
 #include <units/math.h>
@@ -26,6 +27,11 @@ public:
    * Will be called periodically whenever the CommandScheduler runs.
    */
   void Periodic() override;
+
+  /**
+   * Will be called perodically by the scheduler when simulation runs.
+  */
+  void SimulationPeriodic() override;
 
   void SyncEncoders();
   frc::SwerveModuleState GetCurrentState();
@@ -59,4 +65,14 @@ private:
   frc::SimpleMotorFeedforward<units::meters> m_feedForward{
       ModuleConstants::kDriveS, ModuleConstants::kDriveV,
       ModuleConstants::kDriveA};
+
+  // simulation fields
+  frc::Timer m_simTimer;
+  
+  frc::sim::SimDeviceSim m_driveSim;
+  frc::sim::SimDeviceSim m_steerSim;
+
+  hal::SimDouble m_driveSimVelocity;
+  hal::SimDouble m_driveSimPosition;
+  hal::SimDouble m_steerSimPosition;
 };

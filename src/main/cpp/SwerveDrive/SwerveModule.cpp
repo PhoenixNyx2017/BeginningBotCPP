@@ -3,16 +3,22 @@
 #include "SwerveDrive/SwerveModule.h"
 
 #include <frc/geometry/Rotation2d.h>
+#include <frc/RobotBase.h>
 
 #include "Constants.h"
 
 using namespace ctre::phoenix;
 
-SwerveModule::SwerveModule(int driveMotorId, int steerMotorId,
+SwerveModule::SwerveModule(int driveMotorID, int steerMotorID,
                            int steerEncoderId, frc::Rotation2d angleOffset)
-    : m_id{driveMotorId / 10}, m_driveMotor{driveMotorId},
-      m_steerMotor{steerMotorId}, m_steerEncoder{steerEncoderId},
-      m_angleOffset{angleOffset} {
+    : m_id{driveMotorID / 10}, m_driveMotor{driveMotorID},
+      m_steerMotor{steerMotorID}, m_steerEncoder{steerEncoderId},
+      m_angleOffset{angleOffset},
+      m_driveSim("SPARK MAX ", driveMotorID),
+      m_steerSim("SPARK MAX ", steerMotorID),
+      m_driveSimVelocity(m_driveSim.GetDouble("Velocity")),
+      m_driveSimPosition(m_driveSim.GetDouble("Position")),
+      m_steerSimPosition(m_steerSim.GetDouble("Position")) {
   InitEncoder(steerEncoderId);
 
   m_steerMotor.ConfigFactoryDefault();
@@ -74,6 +80,10 @@ SwerveModule::SwerveModule(int driveMotorId, int steerMotorId,
   m_driveMotor.SetVelocityConversionFactor(
       60 * ModuleConstants::kWheelCircumference *
       ModuleConstants::kDriveGearRatio);
+
+  if constexpr (frc::RobotBase::IsSimulation()) {
+    m_simTimer.Start();
+  }
 }
 
 // This method will be called once per scheduler run
@@ -84,6 +94,13 @@ void SwerveModule::Periodic() {
                                  GetAbsoluteRotation().Degrees().value());
   frc::SmartDashboard::PutNumber(std::to_string(m_id) + "Magnet offset",
                                  m_angleOffset.Degrees().value());
+}
+
+void SwerveModule::SimulationPeriodic() {
+  units::second_t dt = m_simTimer.Get();
+  m_simTimer.Reset();
+  m_driveSimPosition.Set(m_driveSimPosition.Get() +
+                         m_driveSimVelocity.Get() * dt.value());
 }
 
 void SwerveModule::SyncEncoders() {
@@ -112,6 +129,10 @@ void SwerveModule::SetDesiredState(frc::SwerveModuleState state) {
   m_driveMotor.Set(motorcontrol::ControlMode::Velocity, state.speed.value(),
                    motorcontrol::DemandType::DemandType_ArbitraryFeedForward,
                    m_feedForward.Calculate(state.speed, 0_mps_sq).value());
+
+  if constexpr (frc::RobotBase::IsSimulation()) {
+    m_steerSimPosition.Set(state.angle.Radians().value());
+  }
 }
 
 void SwerveModule::SetOpenLoopState(frc::SwerveModuleState state) {
