@@ -68,9 +68,9 @@ const double kTrackwidthMeters = 0.4;
 const double kWheelbaseMeters = 0.4;
 
 const double kDefaultAxisDeadband = 0.15;
-const double kMaxTranslationalVelocity = ((6380.0) / 60) *
-                                         kSDSModule.wheelDiameter * std::numbers::pi *
-                                         kSDSModule.driveReduction;
+const double kMaxTranslationalVelocity =
+    ((6380.0) / 60) * kSDSModule.wheelDiameter * std::numbers::pi *
+    kSDSModule.driveReduction;
 
 const double kMaxRotationalVelocity =
     (kMaxTranslationalVelocity) /

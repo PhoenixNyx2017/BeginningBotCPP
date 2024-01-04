@@ -4,13 +4,21 @@
 
 #include <optional>
 
+#include <frc/Joystick.h>
 #include <frc/TimedRobot.h>
 #include <frc2/command/CommandPtr.h>
+#include <frc2/command/InstantCommand.h>
+#include <frc2/command/RunCommand.h>
 
-#include "RobotContainer.h"
+#include "SwerveDrive/SwerveDrive.h"
 
 class Robot : public frc::TimedRobot {
 public:
+  Robot();
+
+  //
+  // Robot Schedule methods
+  //
   void RobotInit() override;
   void RobotPeriodic() override;
   void DisabledInit() override;
@@ -28,5 +36,18 @@ private:
   // doesn't have undefined behavior and potentially crash.
   std::optional<frc2::CommandPtr> m_autonomousCommand;
 
-  RobotContainer m_container;
+  // Subsystems
+  SwerveDrive m_swerveDrive;
+
+  // PS4 controllers
+  frc::Joystick m_driverController{GeneralConstants::kDriverPort};
+  frc::Joystick m_operatorController{GeneralConstants::kOperatorPort};
+
+  //
+  // Robot Container methods
+  //
+  void CreateRobot();
+  void BindCommands();
+  frc2::CommandPtr GetAutonomousCommand();
+  void UpdateDashboard();
 };
