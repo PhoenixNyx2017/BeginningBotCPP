@@ -1,18 +1,24 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) FRC Team 122. All Rights Reserved.
 
 #pragma once
 
 #include <optional>
 
+#include <frc/Joystick.h>
 #include <frc/TimedRobot.h>
 #include <frc2/command/CommandPtr.h>
+#include <frc2/command/InstantCommand.h>
+#include <frc2/command/RunCommand.h>
 
-#include "RobotContainer.h"
+#include "SwerveDrive/SwerveDrive.h"
 
 class Robot : public frc::TimedRobot {
- public:
+public:
+  Robot();
+
+  //
+  // Robot Schedule methods
+  //
   void RobotInit() override;
   void RobotPeriodic() override;
   void DisabledInit() override;
@@ -25,10 +31,23 @@ class Robot : public frc::TimedRobot {
   void SimulationInit() override;
   void SimulationPeriodic() override;
 
- private:
+private:
   // Have it empty by default so that if testing teleop it
   // doesn't have undefined behavior and potentially crash.
   std::optional<frc2::CommandPtr> m_autonomousCommand;
 
-  RobotContainer m_container;
+  // Subsystems
+  SwerveDrive m_swerveDrive;
+
+  // PS4 controllers
+  frc::Joystick m_driverController{GeneralConstants::kDriverPort};
+  frc::Joystick m_operatorController{GeneralConstants::kOperatorPort};
+
+  //
+  // Robot Container methods
+  //
+  void CreateRobot();
+  void BindCommands();
+  frc2::CommandPtr GetAutonomousCommand();
+  void UpdateDashboard();
 };

@@ -1,10 +1,13 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
+// Copyright (c) FRC Team 122. All Rights Reserved.
 
 #include "Robot.h"
 
 #include <frc2/command/CommandScheduler.h>
+#include <frc2/command/button/JoystickButton.h>
+
+#include "SwerveDrive/commands/Drive.h"
+
+Robot::Robot() { this->CreateRobot(); }
 
 void Robot::RobotInit() {}
 
@@ -18,7 +21,7 @@ void Robot::RobotInit() {}
  */
 void Robot::RobotPeriodic() {
   frc2::CommandScheduler::GetInstance().Run();
-  m_container.UpdateDashboard();
+  this->UpdateDashboard();
 }
 
 /**
@@ -35,7 +38,7 @@ void Robot::DisabledPeriodic() {}
  * RobotContainer} class.
  */
 void Robot::AutonomousInit() {
-  m_autonomousCommand = m_container.GetAutonomousCommand();
+  m_autonomousCommand = this->GetAutonomousCommand();
 
   if (m_autonomousCommand) {
     m_autonomousCommand->Schedule();
@@ -74,8 +77,70 @@ void Robot::SimulationInit() {}
  */
 void Robot::SimulationPeriodic() {}
 
-#ifndef RUNNING_FRC_TESTS
-int main() {
-  return frc::StartRobot<Robot>();
+/**
+ * Initializes the robot subsystems and binds commands
+ */
+void Robot::CreateRobot() {
+  // Initialize all of your commands and subsystems here
+  m_swerveDrive.SetDefaultCommand(Drive(
+      &m_swerveDrive,
+      [this] {
+        return MathUtilNK::calculateAxis(
+            m_driverController.GetX(), GeneralConstants::kDefaultAxisDeadband,
+            GeneralConstants::kDriveLimit *
+                GeneralConstants::kMaxTranslationalVelocity);
+      },
+      [this] {
+        return MathUtilNK::calculateAxis(
+            m_driverController.GetY(), GeneralConstants::kDefaultAxisDeadband,
+            GeneralConstants::kDriveLimit *
+                GeneralConstants::kMaxTranslationalVelocity);
+      },
+      [this] {
+        return MathUtilNK::calculateAxis(
+            m_driverController.GetZ(), GeneralConstants::kDefaultAxisDeadband,
+            GeneralConstants::kRotationLimit *
+                GeneralConstants::kMaxRotationalVelocity);
+      }));
+  // TODO: test
+
+  // Configure the button bindings
+  BindCommands();
+  m_swerveDrive.resetHeading();
 }
+
+/**
+ * Binds commands to Joystick buttons
+ */
+void Robot::BindCommands() {
+  frc2::JoystickButton(&m_driverController, 1)
+      .OnTrue(frc2::CommandPtr((frc2::RunCommand([this] {
+        return m_swerveDrive.resetHeading();
+      })))); // TODO assign as test
+}
+
+/**
+ * Returns the Autonomous Command
+ */
+frc2::CommandPtr Robot::GetAutonomousCommand() {
+  return frc2::CommandPtr(frc2::InstantCommand());
+}
+
+/**
+ * Updates the data on the dashboard
+ */
+void Robot::UpdateDashboard() {
+  frc::SmartDashboard::PutNumber("driver X", m_driverController.GetX());
+  frc::SmartDashboard::PutNumber(
+      "adjusted X",
+      MathUtilNK::calculateAxis(
+          m_driverController.GetX(), GeneralConstants::kDefaultAxisDeadband,
+          GeneralConstants::kDriveLimit *
+              GeneralConstants::kMaxTranslationalVelocity));
+  frc::SmartDashboard::PutNumber("Swerve Drive Heading",
+                                 m_swerveDrive.getHeading().Degrees().value());
+}
+
+#ifndef RUNNING_FRC_TESTS
+int main() { return frc::StartRobot<Robot>(); }
 #endif
