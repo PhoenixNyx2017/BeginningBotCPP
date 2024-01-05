@@ -2,8 +2,10 @@
 
 #include "SwerveDrive/SwerveModule.h"
 
-#include <frc/geometry/Rotation2d.h>
+#include <ctre/phoenix/motorcontrol/ControlMode.h>
 #include <frc/RobotBase.h>
+#include <frc/geometry/Rotation2d.h>
+#include <frc/smartdashboard/SmartDashboard.h>
 
 #include "Constants.h"
 
@@ -13,9 +15,8 @@ SwerveModule::SwerveModule(int driveMotorID, int steerMotorID,
                            int steerEncoderId, frc::Rotation2d angleOffset)
     : m_id{driveMotorID / 10}, m_driveMotor{driveMotorID},
       m_steerMotor{steerMotorID}, m_steerEncoder{steerEncoderId},
-      m_angleOffset{angleOffset},
-      m_driveSim("SPARK MAX ", driveMotorID),
-      m_steerSim("SPARK MAX ", steerMotorID),
+      m_angleOffset{angleOffset}, m_driveSim("TalonFX", driveMotorID),
+      m_steerSim("TalonFX", steerMotorID),
       m_driveSimVelocity(m_driveSim.GetDouble("Velocity")),
       m_driveSimPosition(m_driveSim.GetDouble("Position")),
       m_steerSimPosition(m_steerSim.GetDouble("Position")) {
@@ -73,10 +74,9 @@ SwerveModule::SwerveModule(int driveMotorID, int steerMotorID,
 
   m_driveMotor.SetSelectedSensorPosition(0);
 
-  m_steerMotor.SetPositionConversionFactor(360 *
-                                           ModuleConstants::kTurnGearRatio);
+  m_steerMotor.SetPositionConversionFactor(360 / ModuleConstants::kTurnGearRatio);
   m_driveMotor.SetPositionConversionFactor(
-      ModuleConstants::kWheelCircumference * ModuleConstants::kDriveGearRatio);
+      ModuleConstants::kWheelCircumference / ModuleConstants::kDriveGearRatio);
   m_driveMotor.SetVelocityConversionFactor(
       60 * ModuleConstants::kWheelCircumference *
       ModuleConstants::kDriveGearRatio);
@@ -88,12 +88,15 @@ SwerveModule::SwerveModule(int driveMotorID, int steerMotorID,
 
 // This method will be called once per scheduler run
 void SwerveModule::Periodic() {
-  SyncEncoders();
-
-  frc::SmartDashboard::PutNumber(std::to_string(m_id) + "PureRaw Angle",
+  frc::SmartDashboard::PutNumber("Module " + std::to_string(m_id) +
+                                     " Reported Angle",
+                                 GetRotation().Degrees().value());
+  frc::SmartDashboard::PutNumber("Module " + std::to_string(m_id) +
+                                     " CANCoder Angle",
                                  GetAbsoluteRotation().Degrees().value());
-  frc::SmartDashboard::PutNumber(std::to_string(m_id) + "Magnet offset",
-                                 m_angleOffset.Degrees().value());
+  // frc::SmartDashboard::PutNumber("Module " + std::to_string(m_id) + " Magnet
+  // offset",
+  //                                m_angleOffset.Degrees().value());
 }
 
 void SwerveModule::SimulationPeriodic() {
@@ -101,6 +104,8 @@ void SwerveModule::SimulationPeriodic() {
   m_simTimer.Reset();
   m_driveSimPosition.Set(m_driveSimPosition.Get() +
                          m_driveSimVelocity.Get() * dt.value());
+  frc::SmartDashboard::PutNumber(std::to_string(m_id) + "Module Position",
+                                 m_driveSimPosition.Get());
 }
 
 void SwerveModule::SyncEncoders() {
@@ -122,10 +127,24 @@ void SwerveModule::SetDesiredState(frc::SwerveModuleState state) {
 
   // TODO: May throw error
   state = frc::SwerveModuleState::Optimize(state, rotation);
-  state = CheckForWrapAround(state, rotation);
+  // state = CheckForWrapAround(state, rotation);
+
+  double delta = (state.angle - rotation).Degrees().value();
+
+  if (delta < -180) {
+    delta += 360;
+  }
+  if (delta > 180) {
+    delta -= 360;
+  }
 
   m_steerMotor.Set(motorcontrol::ControlMode::Position,
-                   state.angle.Degrees().value());
+                   rotation.Degrees().value() + delta);
+
+  frc::SmartDashboard::PutNumber("Module " + std::to_string(m_id) +
+                                     " Desired Angle",
+                                 state.angle.Degrees().value());
+  // m_steerMotor.Set(motorcontrol::ControlMode::Position, 0);
   m_driveMotor.Set(motorcontrol::ControlMode::Velocity, state.speed.value(),
                    motorcontrol::DemandType::DemandType_ArbitraryFeedForward,
                    m_feedForward.Calculate(state.speed, 0_mps_sq).value());

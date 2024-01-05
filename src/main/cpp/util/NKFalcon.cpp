@@ -1,12 +1,14 @@
 // Copyright (c) FRC Team 122. All Rights Reserved.
 
 #include "util/NKFalcon.h"
+#include "frc/smartdashboard/SmartDashboard.h"
 
 #include <ctre/phoenix/motorcontrol/can/TalonFX.h>
+#include <string>
 
 using namespace ctre::phoenix;
 
-NKFalcon::NKFalcon(int CANId) : m_motor{CANId} {
+NKFalcon::NKFalcon(int CANId) : m_id{CANId}, m_motor{CANId} {
   SetPositionConversionFactor(1.0);
   SetVelocityConversionFactor(1.0);
 }
@@ -76,7 +78,7 @@ void NKFalcon::SetClosedLoopRampRate(double rampRate) {
 
 void NKFalcon::SetSelectedSensorPosition(double sensorPos, int pidIdx,
                                          int timeoutMs) {
-  m_motor.SetSelectedSensorPosition(sensorPos * m_positionConversionFactor,
+  m_motor.SetSelectedSensorPosition(sensorPos / m_positionConversionFactor,
                                     pidIdx, timeoutMs);
 }
 
@@ -96,10 +98,10 @@ void NKFalcon::SetVelocityMeasurementPeriod(
 void NKFalcon::Set(motorcontrol::ControlMode mode, double value) {
   switch (mode) {
   case motorcontrol::ControlMode::Position:
-    m_motor.Set(mode, value * m_positionConversionFactor);
+    m_motor.Set(mode, value / m_positionConversionFactor);
     break;
   case motorcontrol::ControlMode::Velocity:
-    m_motor.Set(mode, value * m_velocityConversionFactor);
+    m_motor.Set(mode, value / m_velocityConversionFactor);
     break;
   default:
     m_motor.Set(mode, value);
@@ -110,11 +112,11 @@ void NKFalcon::Set(motorcontrol::ControlMode mode, double demand0,
                    motorcontrol::DemandType demand1Type, double demand1) {
   switch (mode) {
   case motorcontrol::ControlMode::Position:
-    m_motor.Set(mode, demand0 * m_positionConversionFactor, demand1Type,
+    m_motor.Set(mode, demand0 / m_positionConversionFactor, demand1Type,
                 demand1);
     break;
   case motorcontrol::ControlMode::Velocity:
-    m_motor.Set(mode, demand0 * m_velocityConversionFactor, demand1Type,
+    m_motor.Set(mode, demand0 / m_velocityConversionFactor, demand1Type,
                 demand1);
     break;
   default:

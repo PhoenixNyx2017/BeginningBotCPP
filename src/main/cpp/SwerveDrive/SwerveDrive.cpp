@@ -1,6 +1,9 @@
 // Copyright (c) FRC Team 122. All Rights Reserved.
 
 #include "SwerveDrive/SwerveDrive.h"
+#include "frc/smartdashboard/SmartDashboard.h"
+
+#include <frc/kinematics/SwerveDriveOdometry.h>
 
 SwerveDrive::SwerveDrive()
     : modules{{SwerveModule(GeneralConstants::kFrontLeftDriveMotorID,
@@ -57,6 +60,10 @@ void SwerveDrive::drive(frc::ChassisSpeeds desiredSpeeds) {
   for (int i = 0; i < 4; i++) {
     modules[i].SetDesiredState(states[i]);
   }
+
+  frc::SmartDashboard::PutNumber("drive/vx", desiredSpeeds.vx.value());
+  frc::SmartDashboard::PutNumber("drive/vy", desiredSpeeds.vy.value());
+  frc::SmartDashboard::PutNumber("drive/omega", desiredSpeeds.omega.value());
 }
 
 void SwerveDrive::setFast() {}
@@ -149,4 +156,10 @@ void SwerveDrive::publishOdometry(frc::Pose2d odometryPose) {
 
 void SwerveDrive::printNetworkTableValues() {
   // TODO: write print function :3
+}
+
+void SwerveDrive::SyncEncoders() {
+  for (auto& module : modules) {
+    module.SyncEncoders();
+  }
 }

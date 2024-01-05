@@ -31,7 +31,9 @@ void Robot::RobotPeriodic() {
  */
 void Robot::DisabledInit() {}
 
-void Robot::DisabledPeriodic() {}
+void Robot::DisabledPeriodic() {
+  m_swerveDrive.SyncEncoders();
+}
 
 /**
  * This autonomous runs the autonomous command selected by your {@link
@@ -86,19 +88,19 @@ void Robot::CreateRobot() {
       &m_swerveDrive,
       [this] {
         return MathUtilNK::calculateAxis(
-            m_driverController.GetX(), GeneralConstants::kDefaultAxisDeadband,
+            m_driverController.GetRawAxis(0), GeneralConstants::kDefaultAxisDeadband,
             GeneralConstants::kDriveLimit *
                 GeneralConstants::kMaxTranslationalVelocity);
       },
       [this] {
         return MathUtilNK::calculateAxis(
-            m_driverController.GetY(), GeneralConstants::kDefaultAxisDeadband,
+            m_driverController.GetRawAxis(1), GeneralConstants::kDefaultAxisDeadband,
             GeneralConstants::kDriveLimit *
                 GeneralConstants::kMaxTranslationalVelocity);
       },
       [this] {
         return MathUtilNK::calculateAxis(
-            m_driverController.GetZ(), GeneralConstants::kDefaultAxisDeadband,
+            m_driverController.GetRawAxis(4), GeneralConstants::kDefaultAxisDeadband,
             GeneralConstants::kRotationLimit *
                 GeneralConstants::kMaxRotationalVelocity);
       }));

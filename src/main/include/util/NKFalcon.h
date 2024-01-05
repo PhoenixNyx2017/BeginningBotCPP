@@ -158,10 +158,11 @@ public:
   bool HasResetOccured();
 
 private:
+  int m_id;
   double m_positionConversionFactor;
   double m_velocityConversionFactor;
   motorcontrol::can::TalonFXConfiguration m_config{};
-  motorcontrol::can::TalonFX m_motor;
+  motorcontrol::can::WPI_TalonFX m_motor;
 };
 
 } // namespace ctre::phoenix

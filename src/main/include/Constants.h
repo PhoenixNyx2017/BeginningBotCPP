@@ -78,49 +78,43 @@ const double kMaxRotationalVelocity =
 const bool kIsFieldRelative = true;
 const bool kIsOpenLoop = false;
 
-const int kFrontLeftDriveMotorID = 10;
-const int kFrontLeftTurnMotorID = 11;
-const int kFrontLeftEncoderID = 12;
 const frc::Rotation2d kFrontLeftOffset =
-    frc::Rotation2d(units::degree_t{103.711}); // module 1
-//     public static final Rotation2d kFrontLeftOffset =
-//     Rotation2d.fromDegrees(106.172); // 283.447.unaryMinus() // -76.201
+    frc::Rotation2d(units::degree_t{65.54}); // module 1
+const frc::Rotation2d kFrontRightOffset =
+    frc::Rotation2d(units::degree_t{15.99}); // 139.658 // 139.658 // module 2
+const frc::Rotation2d kBackLeftOffset =
+    frc::Rotation2d(units::degree_t{356.0}); // module 3
+const frc::Rotation2d kBackRightOffset =
+    frc::Rotation2d(units::degree_t{180 + 48.0}); // 265.517 // -93.867 // module 4
+
 const frc::Translation2d kFrontLeftPosition =
     frc::Translation2d(units::meter_t{kTrackwidthMeters / 2.0},
                        units::meter_t{kWheelbaseMeters / 2.0});
-
-const int kFrontRightDriveMotorID = 20;
-const int kFrontRightTurnMotorID = 21;
-const int kFrontRightEncoderID = 22;
-const frc::Rotation2d kFrontRightOffset =
-    frc::Rotation2d(units::degree_t{318.427}); // 139.658 // 139.658 // module 2
-//     public static final Rotation2d kFrontRightOffset =
-//     Rotation2d.fromDegrees(318.164); // 139.658 // 139.658
 const frc::Translation2d kFrontRightPosition =
     frc::Translation2d(units::meter_t{kTrackwidthMeters / 2.0},
                        units::meter_t{-kWheelbaseMeters / 2.0});
-
-const int kBackLeftDriveMotorID = 30;
-const int kBackLeftTurnMotorID = 31;
-const int kBackLeftEncoderID = 32;
-const frc::Rotation2d kBackLeftOffset =
-    frc::Rotation2d(units::degree_t{275.273}); // 95.977 // 96.680 // module 3
-//     public static final Rotation2d kBackLeftOffset =
-//     Rotation2d.fromDegrees(-84.551);  // 95.977 // 96.680
 const frc::Translation2d kBackLeftPosition =
     frc::Translation2d(units::meter_t{-kTrackwidthMeters / 2.0},
                        units::meter_t{kWheelbaseMeters / 2.0});
-
-const int kBackRightDriveMotorID = 40;
-const int kBackRightTurnMotorID = 41;
-const int kBackRightEncoderID = 42;
-const frc::Rotation2d kBackRightOffset =
-    frc::Rotation2d(units::degree_t{87.539}); // 265.517 // -93.867 // module 4
-//     public static final Rotation2d kBackRightOffset =
-//     Rotation2d.fromDegrees(88.770); // 265.517 // -93.867
 const frc::Translation2d kBackRightPosition =
     frc::Translation2d(units::meter_t{-kTrackwidthMeters / 2.0},
                        units::meter_t{-kWheelbaseMeters / 2.0});
+
+const int kFrontLeftDriveMotorID = 30;
+const int kFrontLeftTurnMotorID = 31;
+const int kFrontLeftEncoderID = 32;
+
+const int kFrontRightDriveMotorID = 10;
+const int kFrontRightTurnMotorID = 11;
+const int kFrontRightEncoderID = 12;
+
+const int kBackLeftDriveMotorID = 40;
+const int kBackLeftTurnMotorID = 41;
+const int kBackLeftEncoderID = 42;
+
+const int kBackRightDriveMotorID = 20;
+const int kBackRightTurnMotorID = 21;
+const int kBackRightEncoderID = 22;
 
 const frc::SwerveDriveKinematics kSwerveKinematics =
     frc::SwerveDriveKinematics(kFrontLeftPosition, kFrontRightPosition,
@@ -148,7 +142,7 @@ const double kDriveVoltageComp = 12;
 
 const bool kTurnMotorInverted = true;
 const ctre::phoenix::motorcontrol::NeutralMode kTurnMotorNeutral =
-    ctre::phoenix::motorcontrol::NeutralMode::Brake; // set back to brake to be
+    ctre::phoenix::motorcontrol::NeutralMode::Coast; // set back to brake to be
                                                      // amazing
 const double kTurnVoltageComp = 12;
 const bool kEncoderInverted = false;
@@ -175,9 +169,9 @@ const double kDriveI = 0.0;
 const double kDriveD = 0.0;
 const double kDriveF = 0; // 0.25 / 0.54 * 0.1;
 
-const double kTurnP = 0.6;
-const double kTurnI = 0;
-const double kTurnD = 12.0; // 12.0
+const double kTurnP = 0.3;
+const double kTurnI = 0.0;
+const double kTurnD = 1.0; // 12.0
 const double kTurnF = 0.0;
 
 } // namespace ModuleConstants

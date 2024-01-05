@@ -30,7 +30,7 @@ public:
 
   /**
    * Will be called perodically by the scheduler when simulation runs.
-  */
+   */
   void SimulationPeriodic() override;
 
   void SyncEncoders();
@@ -51,10 +51,6 @@ private:
   // declared private and exposed only through public methods.
   int m_id;
 
-  ctre::phoenix::motorcontrol::can::TalonFXConfiguration m_DriveMotorConfig{};
-
-  ctre::phoenix::motorcontrol::can::TalonFXConfiguration m_TurnMotorConfig{};
-
   ctre::phoenix::sensors::CANCoderConfiguration m_EncoderConfig{};
 
   ctre::phoenix::NKFalcon m_driveMotor;
@@ -68,7 +64,7 @@ private:
 
   // simulation fields
   frc::Timer m_simTimer;
-  
+
   frc::sim::SimDeviceSim m_driveSim;
   frc::sim::SimDeviceSim m_steerSim;
 
